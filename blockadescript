@@ -34,14 +34,15 @@ local Window = Rayfield:CreateWindow({
     }
 })
 
-local Tab2442 = Window:CreateTab("Player Stats", 0)
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local camera = workspace.CurrentCamera
 local h = character:FindFirstChild("Humanoid")
 
-local Slider = Tab2442:CreateSlider({
+local PlayerTap = Window:CreateTab("Player Stats", 0)
+local StatSection = PlayerTap:CreateSection("Player things")
+local Slider = PlayerTap:CreateSlider({
     Name = "WalkSpeed",
     Range = {16, 500},
     Increment = 5,
@@ -53,8 +54,9 @@ local Slider = Tab2442:CreateSlider({
     end,
 })
 
+
 local running = false
-local Toggle = Tab2442:CreateToggle({
+local Toggle = PlayerTap:CreateToggle({
     Name = "Infinite Health",
     CurrentValue = false,
     Flag = "",
@@ -78,7 +80,7 @@ local flying = false
 local flySpeed = 45
 local movers = {}
 
-local FlySpeedSlider = Tab2442:CreateSlider({
+local FlySpeedSlider = PlayerTap:CreateSlider({
     Name = "Fly Speed",
     Range = {10, 200},
     Increment = 5,
@@ -156,11 +158,144 @@ local function toggleFly(enable)
     end
 end
 
-local FlyToggle = Tab2442:CreateToggle({
+local FlyToggle = PlayerTap:CreateToggle({
     Name = "Fly Mode",
     CurrentValue = false,
     Flag = "FlyToggle",
     Callback = function(Value)
         toggleFly(Value)
+    end,
+})
+
+
+-- Modification to Auto Farm Tab
+local AutoFarmTab = Window:CreateTab("Auto Farm", 0)
+local AutoFarmSection = AutoFarmTab:CreateSection("Farm Options")
+
+local autoFarmActive = false
+local maxDistance = 5000
+
+-- الحصول على اللاعبين في السيرفر الحالي
+local function getTeammates()
+    local teammates = {}
+    for _, p in pairs(game.Players:GetPlayers()) do
+        if p.Team == player.Team then
+            table.insert(teammates, p.Name)
+        end
+    end
+    return teammates
+end
+
+local function findClosestAliveNPC(maxDist, part)
+    local teammates = getTeammates()
+    local lastDist = maxDist
+    local closest = nil
+    
+    for _, v in pairs(workspace:GetDescendants()) do
+        if v:IsA("Model") and v:FindFirstChild("Humanoid") and v:FindFirstChild("HumanoidRootPart") then
+            local hum = v:FindFirstChild("Humanoid")
+            local playerInModel = game.Players:GetPlayerFromCharacter(v)
+            
+            -- التأكد من عدم استهداف الزملاء
+            local isTeammate = playerInModel and table.find(teammates, playerInModel.Name)
+            
+            if hum and hum.Health > 0 and not isTeammate then
+                local thisDist = (v.HumanoidRootPart.Position - part.Position).Magnitude
+                if thisDist < lastDist then
+                    closest = v
+                    lastDist = thisDist
+                end
+            end
+        end
+    end
+    return closest
+end
+
+local function attackNPC(npc)
+    pcall(function()
+        if npc and npc:FindFirstChild("Humanoid") and npc.Humanoid.Health > 0 then
+            local tool = game.Players.LocalPlayer.Character:FindFirstChildOfClass("Tool")
+            if tool then
+                tool:Activate()
+            end
+        end
+    end)
+end
+
+-- إيقاف الجاذبية للثبات في الهواء
+local function disableGravity()
+    for _, v in pairs(character:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CustomPhysicalProperties = PhysicalProperties.new(0, 0, 0, 0, 0)
+        end
+    end
+end
+
+-- تمكين الجاذبية
+local function enableGravity()
+    for _, v in pairs(character:GetDescendants()) do
+        if v:IsA("BasePart") then
+            v.CustomPhysicalProperties = PhysicalProperties.new(0.7, 0.3, 0.5, 0.05, 50)
+        end
+    end
+end
+
+local function startAutoFarm()
+    disableGravity()
+    spawn(function()
+        while autoFarmActive do
+            pcall(function()
+                local player = game.Players.LocalPlayer
+                local char = player.Character or player.CharacterAdded:Wait()
+                local hrp = char:FindFirstChild("HumanoidRootPart")
+                
+                if char and hrp then
+                    local target = findClosestAliveNPC(maxDistance, hrp)
+                    
+                    if target and target:FindFirstChild("HumanoidRootPart") then
+                        local targetSize = target:GetExtentsSize().Y
+                        local targetPos = target.HumanoidRootPart.Position
+                        
+                        -- Positioning directly above NPC based on its size
+                        local yOffset = targetSize + 3  -- Add small buffer
+                        
+                        -- Teleport above NPC and look up (opposite of previous version)
+                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * 
+                                     CFrame.Angles(math.rad(-90), 0, 0)
+                        
+                        -- Attack NPC
+                        attackNPC(target)
+                    end
+                end
+            end)
+            task.wait(0.1)
+        end
+        
+        -- إعادة تمكين الجاذبية عند إيقاف الفارم
+        enableGravity()
+    end)
+end
+
+local AutoFarmToggle = AutoFarmTab:CreateToggle({
+    Name = "Auto Farm",
+    CurrentValue = false,
+    Flag = "AutoFarmToggle",
+    Callback = function(Value)
+        autoFarmActive = Value
+        if Value then
+            startAutoFarm()
+        end
+    end
+})
+
+local DistanceSlider = AutoFarmTab:CreateSlider({
+    Name = "Farm Radius",
+    Range = {100, 10000},
+    Increment = 100,
+    Suffix = "Studs",
+    CurrentValue = 5000,
+    Flag = "FarmRadius",
+    Callback = function(Value)
+        maxDistance = Value
     end,
 })
