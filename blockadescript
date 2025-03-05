@@ -212,6 +212,7 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local userInputService = game:GetService("UserInputService")
+local h = character.Humanoid
 
 local PlayerTap = Window:CreateTab("Player Stats", 0)
 local StatSection = PlayerTap:CreateSection("Player things")
