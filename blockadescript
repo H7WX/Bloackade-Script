@@ -192,7 +192,7 @@ local toiletNames = {
 "Zombie Huge ST toilet",
 "Zombie Jumper Camera Man",
 "Zombie Large ST toilet",
-"Zombie Skibidi toilet",
+"Zombie Skibidi Toilet",
 "Zombie Strider Gun",
 "Zombie Tentacle Arm",
 "Zombie Upgraded Titan Speaker",
@@ -422,7 +422,7 @@ hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * CFrame.Angles(
                     end
                 end
             end)
-            task.wait(0.1)  -- Wait 1/4 second between actions
+            task.wait(0.05)  -- Wait 1/4 second between actions
         end
     end)
 end
