@@ -1,0 +1,166 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+local Window = Rayfield:CreateWindow({
+    Name = "Blockade Hub",
+    Icon = 0,
+    LoadingTitle = "Cooking Up...",
+    LoadingSubtitle = "by D & 7",
+    Theme = "Default",
+
+    DisableRayfieldPrompts = false,
+    DisableBuildWarnings = false,
+
+    ConfigurationSaving = {
+        Enabled = true,
+        FolderName = nil,
+        FileName = "Blockade Hub"
+    },
+
+    Discord = {
+        Enabled = false,
+        Invite = "noinvitelink",
+        RememberJoins = true
+    },
+
+    KeySystem = false,
+    KeySettings = {
+        Title = "Untitled",
+        Subtitle = "Key System",
+        Note = "No method of obtaining the key is provided",
+        FileName = "Key",
+        SaveKey = true,
+        GrabKeyFromSite = false,
+        Key = {"Hello"}
+    }
+})
+
+local Tab2442 = Window:CreateTab("Player Stats", 0)
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local rootPart = character:WaitForChild("HumanoidRootPart")
+local camera = workspace.CurrentCamera
+local h = character:FindFirstChild("Humanoid")
+
+local Slider = Tab2442:CreateSlider({
+    Name = "WalkSpeed",
+    Range = {16, 500},
+    Increment = 5,
+    Suffix = "Speed",
+    CurrentValue = 16,
+    Flag = "",
+    Callback = function(Value)
+        h.WalkSpeed = Value
+    end,
+})
+
+local running = false
+local Toggle = Tab2442:CreateToggle({
+    Name = "Infinite Health",
+    CurrentValue = false,
+    Flag = "",
+    Callback = function(Value)
+        running = Value
+        while running do
+            if h.Health <= 1 then
+                h.Health = 10000
+            end
+            task.wait(0.1)
+        end
+    end,
+})
+
+
+local runService = game:GetService("RunService")
+local userInputService = game:GetService("UserInputService")
+local tweenService = game:GetService("TweenService")
+
+local flying = false
+local flySpeed = 45
+local movers = {}
+
+local FlySpeedSlider = Tab2442:CreateSlider({
+    Name = "Fly Speed",
+    Range = {10, 200},
+    Increment = 5,
+    Suffix = "Speed",
+    CurrentValue = 45,
+    Flag = "FlySpeed",
+    Callback = function(Value)
+        flySpeed = Value
+    end,
+})
+
+local function toggleFly(enable)
+    local primaryPart = character.PrimaryPart
+    if not primaryPart then return end
+
+    if enable then
+        if not movers[1] then
+            local bodyVelocity = Instance.new("BodyVelocity")
+            bodyVelocity.MaxForce = Vector3.one * 9e9
+
+            local bodyGyro = Instance.new("BodyGyro")
+            bodyGyro.MaxTorque = Vector3.one * 9e9
+            bodyGyro.P = 9e4
+
+            local bodyAngularVelocity = Instance.new("BodyAngularVelocity")
+            bodyAngularVelocity.AngularVelocity = Vector3.yAxis * 9e9
+            bodyAngularVelocity.MaxTorque = Vector3.yAxis * 9e9
+            bodyAngularVelocity.P = 9e9
+
+            movers = {bodyVelocity, bodyGyro, bodyAngularVelocity}
+        end
+
+        flying = true
+        runService.Heartbeat:Connect(function()
+            if not flying then return end
+
+            local camCFrame = camera.CFrame
+            local velocity = Vector3.zero
+            local rotation = camCFrame.Rotation
+
+            if userInputService:IsKeyDown(Enum.KeyCode.W) then
+                velocity += camCFrame.LookVector
+                rotation *= CFrame.Angles(math.rad(-40), 0, 0)
+            end
+            if userInputService:IsKeyDown(Enum.KeyCode.S) then
+                velocity -= camCFrame.LookVector
+                rotation *= CFrame.Angles(math.rad(40), 0, 0)
+            end
+            if userInputService:IsKeyDown(Enum.KeyCode.D) then
+                velocity += camCFrame.RightVector
+                rotation *= CFrame.Angles(0, 0, math.rad(-40))
+            end
+            if userInputService:IsKeyDown(Enum.KeyCode.A) then
+                velocity -= camCFrame.RightVector
+                rotation *= CFrame.Angles(0, 0, math.rad(40))
+            end
+            if userInputService:IsKeyDown(Enum.KeyCode.E) then
+                velocity += Vector3.yAxis
+            end
+            if userInputService:IsKeyDown(Enum.KeyCode.Q) then
+                velocity -= Vector3.yAxis
+            end
+
+            local tweenInfo = TweenInfo.new(0.5)
+            tweenService:Create(movers[1], tweenInfo, { Velocity = velocity * flySpeed }):Play()
+            movers[1].Parent = primaryPart
+            tweenService:Create(movers[2], tweenInfo, { CFrame = rotation }):Play()
+            movers[2].Parent = primaryPart
+        end)
+    else
+        flying = false
+        for _, mover in ipairs(movers) do
+            if mover then mover.Parent = nil end
+        end
+    end
+end
+
+local FlyToggle = Tab2442:CreateToggle({
+    Name = "Fly Mode",
+    CurrentValue = false,
+    Flag = "FlyToggle",
+    Callback = function(Value)
+        toggleFly(Value)
+    end,
+})
