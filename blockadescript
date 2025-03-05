@@ -392,7 +392,8 @@ local function startAutoFarm()
                         local yOffset = targetSize + 3
         
                                                 -- Teleport above NPC and look down
-hrp.CFrame = CFrame.new(targetPos - Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
+hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
+
 
                         -- Simulate left mouse click
                         simulateMouseClick()
