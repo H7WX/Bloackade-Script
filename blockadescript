@@ -54,7 +54,6 @@ local Slider = PlayerTap:CreateSlider({
     end,
 })
 
-
 local running = false
 local Toggle = PlayerTap:CreateToggle({
     Name = "Infinite Health",
@@ -63,14 +62,13 @@ local Toggle = PlayerTap:CreateToggle({
     Callback = function(Value)
         running = Value
         while running do
-            if h.Health <= 1 then
+            if h.Health < 10000 then
                 h.Health = 10000
             end
             task.wait(0.1)
         end
     end,
 })
-
 
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
@@ -168,14 +166,12 @@ local FlyToggle = PlayerTap:CreateToggle({
 })
 
 
--- Modification to Auto Farm Tab
 local AutoFarmTab = Window:CreateTab("Auto Farm", 0)
 local AutoFarmSection = AutoFarmTab:CreateSection("Farm Options")
 
 local autoFarmActive = false
 local maxDistance = 5000
 
--- الحصول على اللاعبين في السيرفر الحالي
 local function getTeammates()
     local teammates = {}
     for _, p in pairs(game.Players:GetPlayers()) do
@@ -196,7 +192,6 @@ local function findClosestAliveNPC(maxDist, part)
             local hum = v:FindFirstChild("Humanoid")
             local playerInModel = game.Players:GetPlayerFromCharacter(v)
             
-            -- التأكد من عدم استهداف الزملاء
             local isTeammate = playerInModel and table.find(teammates, playerInModel.Name)
             
             if hum and hum.Health > 0 and not isTeammate then
