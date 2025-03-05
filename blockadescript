@@ -192,7 +192,7 @@ local toiletNames = {
 "Zombie Huge ST toilet",
 "Zombie Jumper Camera Man",
 "Zombie Large ST toilet",
-"Zombie Skibidi Toilet",
+"Zombie Skibidi toilet",
 "Zombie Strider Gun",
 "Zombie Tentacle Arm",
 "Zombie Upgraded Titan Speaker",
@@ -245,11 +245,8 @@ local Toggle = PlayerTap:CreateToggle({
     end,
 })
 
-local runService = game:GetService("RunService")
-local userInputService = game:GetService("UserInputService")
-local tweenService = game:GetService("TweenService")
-
 local noclipEnabled = false
+local noclipDefaults = {}
 
 local ToggleNoclip = PlayerTap:CreateToggle({
     Name = "Noclip",
@@ -257,19 +254,37 @@ local ToggleNoclip = PlayerTap:CreateToggle({
     Flag = "",
     Callback = function(Value)
         noclipEnabled = Value
+
+        local character = player.Character
+        if character then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    if noclipDefaults[part] == nil then
+                        noclipDefaults[part] = part.CanCollide
+                    end
+                    part.CanCollide = not noclipEnabled
+                end
+            end
+        end
     end,
 })
 
 runService.Stepped:Connect(function()
-    local character = localPlayer.Character
-    if character then
-        for _, part in ipairs(character:GetDescendants()) do
-            if part:IsA("BasePart") then
-                part.CanCollide = not noclipEnabled
+    if noclipEnabled then
+        local character = player.Character
+        if character then
+            for _, part in ipairs(character:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.CanCollide = false
+                end
             end
         end
     end
 end)
+
+local runService = game:GetService("RunService")
+local userInputService = game:GetService("UserInputService")
+local tweenService = game:GetService("TweenService")
 
 local flying = false
 local flySpeed = 45
@@ -414,15 +429,14 @@ local function startAutoFarm()
                         local yOffset = targetSize + 3
         
                                                 -- Teleport above NPC and look down
-hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
-
+hrp.CFrame = CFrame.new(targetPos - Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
 
                         -- Simulate left mouse click
                         simulateMouseClick()
                     end
                 end
             end)
-            task.wait(0.05)  -- Wait 1/4 second between actions
+            task.wait(0.1)  -- Wait 1/4 second between actions
         end
     end)
 end
