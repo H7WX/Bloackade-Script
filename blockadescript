@@ -249,6 +249,28 @@ local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
 
+local noclipEnabled = false
+
+local ToggleNoclip = PlayerTap:CreateToggle({
+    Name = "Noclip",
+    CurrentValue = false,
+    Flag = "",
+    Callback = function(Value)
+        noclipEnabled = Value
+    end,
+})
+
+runService.Stepped:Connect(function()
+    local character = localPlayer.Character
+    if character then
+        for _, part in ipairs(character:GetDescendants()) do
+            if part:IsA("BasePart") then
+                part.CanCollide = not noclipEnabled
+            end
+        end
+    end
+end)
+
 local flying = false
 local flySpeed = 45
 local movers = {}
