@@ -212,6 +212,12 @@ local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local userInputService = game:GetService("UserInputService")
+local OpenS = Instance.new("Sound")
+OpenS.SoundId = "rbxassetid://8551372796"
+
+if h then
+    OpenS:Play()
+end
 
 local PlayerTap = Window:CreateTab("Player Stats", 0)
 local StatSection = PlayerTap:CreateSection("Player things")
@@ -391,7 +397,7 @@ local function startAutoFarm()
         
                                                 -- Teleport above NPC and look down
                         hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * 
-                                     CFrame.Angles(math.rad(90), 0, 0)
+                                     CFrame.Angles(math.rad(180), 0, 0)
 
                         -- Simulate left mouse click
                         simulateMouseClick()
