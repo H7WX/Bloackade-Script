@@ -387,19 +387,15 @@ local function startAutoFarm()
                     if target and target:FindFirstChild("HumanoidRootPart") then
                         local targetSize = target:GetExtentsSize().Y
                         local targetPos = target.HumanoidRootPart.Position
-                        
-                        -- Positioning directly above target based on its size
                         local yOffset = targetSize + 3
         
-                                                -- Teleport above NPC and look down
-hrp.CFrame = CFrame.new(targetPos - Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
+                        hrp.CFrame = CFrame.new(targetPos + Vector3.new(0, yOffset, 0)) * CFrame.Angles(math.rad(-90), 0, 0)
 
-                        -- Simulate left mouse click
                         simulateMouseClick()
                     end
                 end
             end)
-            task.wait(0.1)  -- Wait 1/4 second between actions
+            task.wait(0.1)
         end
     end)
 end
