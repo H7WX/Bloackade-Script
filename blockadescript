@@ -208,12 +208,15 @@ local Window = Rayfield:CreateWindow({
     Theme = "Default"
 })
 
+
+-- التعريفات
 local player = game.Players.LocalPlayer
 local character = player.Character or player.CharacterAdded:Wait()
 local rootPart = character:WaitForChild("HumanoidRootPart")
 local userInputService = game:GetService("UserInputService")
 local h = character.Humanoid
 local camera = workspace.CurrentCamera
+local GameLightning = game:GetService("Lighting")
 
 local PlayerTap = Window:CreateTab("Player Stats", 0)
 local StatSection = PlayerTap:CreateSection("Player things")
@@ -230,21 +233,6 @@ local Slider = PlayerTap:CreateSlider({
 })
 
 local running = false
-local Toggle = PlayerTap:CreateToggle({
-    Name = "Infinite Health",
-    CurrentValue = false,
-    Flag = "",
-    Callback = function(Value)
-        running = Value
-        while running do
-            if h.Health < 10000 then
-                h.Health = 10000
-            end
-            task.wait(0.1)
-        end
-    end,
-})
-
 local runService = game:GetService("RunService")
 local userInputService = game:GetService("UserInputService")
 local tweenService = game:GetService("TweenService")
@@ -421,5 +409,24 @@ local DistanceSlider = AutoFarmTab:CreateSlider({
     Flag = "FarmRadius",
     Callback = function(Value)
         maxDistance = Value
+    end,
+})
+
+local FullBrightToggle = PlayerTap:CreateToggle({
+    Name = "Fullbright",
+    CurrentValue = false,
+    Flag = "Fullbright",
+    Callback = function(Value)
+        if Value then
+            GameLightning.Brightness = 2
+            GameLightning.Ambient = Color3.new(1, 1, 1)
+            GameLightning.ColorShift_Bottom = Color3.new(1, 1, 1)
+            GameLightning.ColorShift_Top = Color3.new(1, 1, 1)
+        else
+            GameLightning.Brightness = 1
+            GameLightning.Ambient = Color3.new(0, 0, 0)
+            GameLightning.ColorShift_Bottom = Color3.new(0, 0, 0)
+            GameLightning.ColorShift_Top = Color3.new(0, 0, 0)
+        end
     end,
 })
