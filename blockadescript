@@ -419,12 +419,12 @@ local FullBrightToggle = PlayerTap:CreateToggle({
     Callback = function(Value)
         if Value then
             GameLightning.Brightness = 2
-            GameLightning.Ambient = Color3.new(1, 1, 1)
-            GameLightning.ColorShift_Bottom = Color3.new(1, 1, 1)
-            GameLightning.ColorShift_Top = Color3.new(1, 1, 1)
+            GameLightning.Ambient = Color3.new(200, 200, 200)
+            GameLightning.ColorShift_Bottom = Color3.new(200, 200, 200)
+            GameLightning.ColorShift_Top = Color3.new(200, 200, 200)
         else
             GameLightning.Brightness = 1
-            GameLightning.Ambient = Color3.new(0, 0, 0)
+            GameLightning.Ambient = Color3.new(70, 70, 70)
             GameLightning.ColorShift_Bottom = Color3.new(0, 0, 0)
             GameLightning.ColorShift_Top = Color3.new(0, 0, 0)
         end
